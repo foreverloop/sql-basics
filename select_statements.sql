@@ -13,3 +13,4 @@ SELECT DISTINCT bcolor FROM t1 ORDER BY bcolor;
 --selects all except red red, which appears twice, so is not distinct
 SELECT DISTINCT bcolor, fcolor FROM  t1  ORDER BY bcolor, fcolor;
 
+SELECT first_name,last_name FROM customer ORDER BY first_name ASC;
