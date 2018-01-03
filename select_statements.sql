@@ -75,3 +75,8 @@ WHERE country_id IN (SELECT country_id FROM country
 					 WHERE country LIKE 'United Kingdom%')
 ORDER BY city DESC;
 
+--between statement for values which fall in a range
+SELECT customer_id,payment_id,amount
+FROM payment
+WHERE amount BETWEEN 8 AND 9;
+
