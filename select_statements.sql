@@ -90,8 +90,7 @@ INNER JOIN payment ON payment.customer_id = customer.customer_id;
 
 /* inner join on staff, payment and customer 
 return customer first name, staff first name
-payment id and amount
-*/
+payment id and amount, only when a match is found ON the ones specified */
 SELECT customer.first_name customer_first_name,
 staff.staff_id,staff.first_name staff_first_name,
 payment.payment_id,amount,payment.customer_id
@@ -141,8 +140,49 @@ VALUES
  (2),
  (3);
 
-SELECT 
-*
+/* CROSS JOIN - cartesian product */
+SELECT *
 FROM T1
 CROSS JOIN T2;
+
+--GROUP BY used to remove duplicate results
+--as well as allow me to sum up the amounts each customer has paid
+SELECT customer_id,SUM(amount)
+FROM payment
+GROUP BY customer_id;
+
+--returns the amounts customers have spent, with the most spent first
+SELECT customer_id,SUM(amount)  
+FROM payment  
+GROUP BY customer_id 
+ORDER BY SUM(amount) DESC;
+
+--return the staff id and a count of how many payment_ids
+--match thier staff ID
+SELECT staff_id,
+COUNT(payment_id)
+FROM payment
+GROUP BY staff_id;
+
+--HAVING statement allows conditional selection on an aggregate function
+--below, only customers who've spent a total over 200 are selected
+SELECT customer_id, SUM(amount)
+FROM payment
+GROUP BY customer_id
+HAVING SUM(amount) > 200;
+
+--UNION operator
+/*
+ combines results of two SELECTs into one set of results
+ the selects must return the same number of cols
+ the cols must be the compatible data type e.g int and decimal ok
+ but int and bool, no
+
+ the below query would UNION sales 2007q1 results with sales 2007q2
+ and remove all duplicate rows. UNION ALL doesn't remove duplicates
+ */
+
+SELECT * FROM sales2007q1
+UNION
+SELECT * FROM sales2007q2;
 
