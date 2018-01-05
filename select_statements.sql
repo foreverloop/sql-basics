@@ -186,3 +186,27 @@ SELECT * FROM sales2007q1
 UNION
 SELECT * FROM sales2007q2;
 
+--find city with most customers
+SELECT city.city,COUNT(address_id) 
+FROM city 
+INNER JOIN address ON city.city_id = address.city_id 
+GROUP BY city.city_id 
+ORDER BY COUNT(address_id) DESC;
+
+--find most popular film rented
+SELECT film.title,COUNT(rental_id) number_of_rentals
+FROM rental
+INNER JOIN inventory ON rental.inventory_id = inventory.inventory_id
+INNER JOIN film ON inventory.film_id = film.film_id
+GROUP BY film.title
+ORDER BY COUNT(rental_id) DESC;
+
+--output the values to a CSV file. this could then be modified in 
+--excel or using python, R etc...
+COPY (SELECT film.title,COUNT(rental_id) number_of_rentals
+FROM rental
+INNER JOIN inventory ON rental.inventory_id = inventory.inventory_id
+INNER JOIN film ON inventory.film_id = film.film_id
+GROUP BY film.title
+ORDER BY COUNT(rental_id) DESC) 
+TO 'user/documents/customer_rentals.csv' (format CSV);
