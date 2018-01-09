@@ -232,3 +232,134 @@ COPY(SELECT city.city,COUNT(address.address_id) FROM customer
 	ORDER BY COUNT(address.address_id) DESC LIMIT 5)
 TO '/users/documents/most_common_cities.csv' (format CSV);
 
+CREATE TABLE employees (
+ employee_id serial PRIMARY KEY,
+ employee_name VARCHAR (255) NOT NULL
+);
+ 
+CREATE TABLE keys (
+ employee_id INT PRIMARY KEY,
+ effective_date DATE NOT NULL,
+ FOREIGN KEY (employee_id) REFERENCES employees (employee_id)
+);
+ 
+CREATE TABLE hipos (
+ employee_id INT PRIMARY KEY,
+ effective_date DATE NOT NULL,
+ FOREIGN KEY (employee_id) REFERENCES employees (employee_id)
+);
+
+INSERT INTO employees (employee_name)
+VALUES
+ ('Joyce Edwards'),
+ ('Diane Collins'),
+ ('Alice Stewart'),
+ ('Julie Sanchez'),
+ ('Heather Morris'),
+ ('Teresa Rogers'),
+ ('Doris Reed'),
+ ('Gloria Cook'),
+ ('Evelyn Morgan'),
+ ('Jean Bell');
+ 
+INSERT INTO keys
+VALUES
+ (1, '2000-02-01'),
+ (2, '2001-06-01'),
+ (5, '2002-01-01'),
+ (7, '2005-06-01');
+ 
+INSERT INTO hipos
+VALUES
+ (9, '2000-01-01'),
+ (2, '2002-06-01'),
+ (5, '2006-06-01'),
+ (10, '2005-06-01');
+
+-- INTERSECT return all rows in common between both tables
+-- INNER JOIN only works on specified cols, by contrast
+-- works on a temp table, not the actual table
+SELECT employee_id
+FROM keys INTERSECT
+SELECT employee_id
+FROM hipos;
+
+-- select all films from film and arrange by title
+SELECT film_id, title
+FROM film
+ORDER BY title;
+
+--select each film's inventory information
+SELECT DISTINCT inventory.film_id,
+title
+FROM inventory
+INNER JOIN film ON film.film_id = inventory.film_id
+ORDER BY title;
+
+--return only the results from the first query before EXCEPT
+--that are NOT also in the second query results
+SELECT film_id, title
+FROM film
+EXCEPT 
+SELECT DISTINCT inventory.film_id,title
+FROM inventory
+INNER JOIN film ON film.film_id = inventory.film_id
+ORDER BY title;
+
+--this query WILL NOT WORK! because aggregate functions
+--cannot be used with the WHERE clause
+SELECT AVG(film.rental_rate)
+FROM film
+WHERE film.rental_rate > AVG(film.rental_rate);
+
+--this is the correct way to use a subquery
+SELECT film_id, title, rental_rate
+FROM film
+WHERE film.rental_rate > (SELECT AVG(film.rental_rate) FROM film)
+ORDER BY rental_rate;
+
+--EXISTS operator returns True or False if a record in it can be found
+SELECT first_name,last_name 
+FROM customer 
+WHERE EXISTS(SELECT 1 FROM payment 
+			 WHERE payment.customer_id = customer.customer_id);
+
+--example of a basic update (actually does not work because of constraints)
+--e.g CHECK(first_name != NULL)
+UPDATE actor SET first_name = NULL WHERE actor_id = 102;
+
+--this does work, because it's not a null value
+UPDATE actor SET first_name = 'Charlie',last_name = 'Jones' WHERE actor_id = 102;
+
+--find the longest films and group them into the query results
+SELECT film.title,film.length 
+FROM film 
+INNER JOIN film_category ON film.film_id = film_category.film_id 
+WHERE film.length >= (SELECT MAX(film.length) FROM film) 
+					  GROUP BY film_category.category_id,film.title,film.length;
+
+--ANY statement, SOME is also valid syntax
+--works similar to IN statement, but <> ANY is different from NOT IN
+SELECT title, category_id
+FROM film
+INNER JOIN film_category USING(film_id)
+WHERE category_id = ANY(SELECT category_id
+						FROM category
+						WHERE NAME = 'Action'
+						OR NAME = 'Drama');
+
+--COALESCE,ISNULL,ifNULL etc... all allow substitute of a value if 
+--the value would otherwise be null, which can cause reporting issues
+SELECT COALESCE(NULL,2,1);
+
+--select all film categories, and all films, regardless if
+--they have matching rows in category and film category
+SELECT film.title,category.name
+FROM category 
+LEFT JOIN film_category ON film_category.category_id = category.category_id 
+LEFT JOIN film ON film.film_id = film_category.film_id 
+ORDER BY category.name;
+
+
+
+
